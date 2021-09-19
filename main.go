@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +22,7 @@ func main() {
 	router.GET("user/query", queryHandler)
 
 	// The 2nd Route (POST)
-	router.POST("/users", postUserHandler)
+	router.POST("/albums", postAlbums)
 
 	// run the program
 	router.Run()
@@ -57,27 +56,25 @@ func queryHandler(c *gin.Context) {
 	})
 }
 
-// create Struct
-type UserInput struct {
-	username string
-	email    string
-	age      int
-	address  string
+// album represents data about a record album.
+type album struct {
+	ID     string  `json:"id"`
+	Title  string  `json:"title"`
+	Artist string  `json:"artist"`
+	Price  float64 `json:"price"`
 }
 
-// Create postUserHandler
-func postUserHandler(c *gin.Context) {
-	var userInput UserInput
+// postAlbums adds an album from JSON received in the request body.
+func postAlbums(c *gin.Context) {
+	var newAlbum album
 
-	err := c.ShouldBindJSON(&userInput)
-	if err != nil {
-		log.Fatal(err)
+	// Call BindJSON to bind the received JSON to
+	// newAlbum.
+	if err := c.BindJSON(&newAlbum); err != nil {
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"username": userInput.username,
-		"email":    userInput.email,
-		"age":      userInput.age,
-		"address":  userInput.address,
-	})
+	// Add the new album to the slice.
+	album = append(album, newAlbum)
+	c.IndentedJSON(http.StatusCreated, newAlbum)
 }
